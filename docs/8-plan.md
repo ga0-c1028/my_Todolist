@@ -32,9 +32,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `.env`(백엔드) 및 `.env.example`에 `DATABASE_URL` 또는 `PGHOST`/`PGUSER`/`PGPASSWORD`/`PGDATABASE`/`PGPORT`를 정의한다(`docs/5-project_principle.md` 5.1절).
   - `psql` 또는 임시 스크립트로 접속 테스트를 수행한다.
 - 완료 조건
-  - [ ] `my_todolist` 데이터베이스가 생성되어 있다.
-  - [ ] `.env.example`에 DB 접속 관련 키가 값 없이 정의되어 있다.
-  - [ ] 로컬 `.env`로 DB 접속이 성공한다(수동 확인).
+  - [x] `my_todolist` 데이터베이스가 생성되어 있다.
+  - [x] `.env.example`에 DB 접속 관련 키가 값 없이 정의되어 있다.
+  - [x] 로컬 `.env`로 DB 접속이 성공한다(수동 확인).
 - 선행 Task: 없음
 - 관련 근거: `docs/5-project_principle.md` 5.1절
 
@@ -45,11 +45,11 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `docs/5-project_principle.md` 7절의 `db/migrations/` 구조를 따르는 경우, `schema.sql`의 내용을 `001_create_users_table.sql`~`004_create_refresh_tokens_table.sql`, `005_add_indexes.sql`로 분리하고 `db/migrate.js`로 순차 적용한다. 2일 일정상 시간이 부족하면 `schema.sql` 단일 파일 적용으로 대체할 수 있다(실용적 선택).
   - `users`, `categories`, `todos`, `refresh_tokens` 4개 테이블과 인덱스, 제약조건(FK, UNIQUE, CHECK)이 정상 생성되었는지 확인한다.
 - 완료 조건
-  - [ ] 4개 테이블(`users`, `categories`, `todos`, `refresh_tokens`)이 생성되어 있다.
-  - [ ] `todos.end_date >= start_date` CHECK 제약(BR-6)이 존재한다.
-  - [ ] 사용자당 기본 카테고리 1개 제약(부분 유니크 인덱스, BR-4)이 존재한다.
-  - [ ] 모든 FK(`categories.user_id`, `todos.user_id`, `todos.category_id`, `refresh_tokens.user_id`)가 정상 연결되어 있다.
-  - [ ] `\dt`(psql) 또는 동등한 명령으로 스키마 적용 결과를 확인했다.
+  - [x] 4개 테이블(`users`, `categories`, `todos`, `refresh_tokens`)이 생성되어 있다.
+  - [x] `todos.end_date >= start_date` CHECK 제약(BR-6)이 존재한다.
+  - [x] 사용자당 기본 카테고리 1개 제약(부분 유니크 인덱스, BR-4)이 존재한다.
+  - [x] 모든 FK(`categories.user_id`, `todos.user_id`, `todos.category_id`, `refresh_tokens.user_id`)가 정상 연결되어 있다.
+  - [x] `\dt`(psql) 또는 동등한 명령으로 스키마 적용 결과를 확인했다.
 - 선행 Task: DB-01
 - 관련 근거: `docs/7-erd.md`, `docs/schema.sql`, BR-4, BR-6
 
@@ -59,8 +59,8 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - 테스트 계정 1~2개, 카테고리(기본 포함), 할일 샘플(시작 전/진행중/완료/기한초과 각 1건 이상)을 삽입하는 시드 스크립트(`db/seed.js` 또는 `.sql`)를 작성한다.
   - 4가지 할일 상태(도메인 정의서 5장)를 모두 눈으로 확인할 수 있도록 날짜값을 의도적으로 분산시킨다.
 - 완료 조건
-  - [ ] 시드 스크립트 실행 시 오류 없이 데이터가 삽입된다.
-  - [ ] 삽입된 할일에 시작 전/진행중/완료/기한초과 상태가 각각 1건 이상 포함되어 있다.
+  - [x] 시드 스크립트 실행 시 오류 없이 데이터가 삽입된다.
+  - [x] 삽입된 할일에 시작 전/진행중/완료/기한초과 상태가 각각 1건 이상 포함되어 있다.
 - 선행 Task: DB-02
 - 관련 근거: 도메인 정의서 5장(상태 판단 규칙)
 
