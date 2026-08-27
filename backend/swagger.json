@@ -43,7 +43,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "회원가입/로그인/토큰 재발급/헬스체크를 제외한 모든 API에 필요한 access_token (BR-1). `Authorization: Bearer <access_token>` 헤더로 전달한다."
+        "description": "회원가입/로그인/로그아웃/토큰 재발급/헬스체크를 제외한 모든 API에 필요한 access_token (BR-1). `Authorization: Bearer <access_token>` 헤더로 전달한다."
       }
     },
     "parameters": {
@@ -709,12 +709,8 @@
           "Auth"
         ],
         "summary": "로그아웃",
-        "description": "로그인한 사용자의 refresh_token을 무효화하여 세션을 종료한다(FR-03).",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "description": "제시된 refresh_token을 무효화하여 세션을 종료한다(FR-03). access_token 없이(만료된 상태에서도) 호출할 수 있다 — 로그아웃은 refresh_token 소유만으로 수행되며 별도의 access_token 인증을 요구하지 않는다.",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {

@@ -6,6 +6,7 @@
 |---|---|---|---|
 | 1.0 | 2026-08-26 | gayoung.rho | 프로젝트 구조 설계 원칙 최초 작성 |
 | 1.1 | 2026-08-26 | gayoung.rho | 프론트엔드 디렉토리 구조를 Feature-Sliced Design(FSD)으로 재설계 |
+| 1.2 | 2026-08-27 | gayoung.rho | 실제 백엔드 구현과의 정합성을 맞추기 위해 갱신: 헬스 라우트 파일명(`health.js`), `schemas/` 실제 파일명(복수형 4개), `db/` 하위 마이그레이션·시드 스크립트 미작성 사실 반영, BR-2 소유권 검증을 서비스 계층 단일 검증으로 명확화, Swagger UI(`/api-docs`, 비운영 환경 한정) 절 추가 |
 
 ## 0. 개요 및 목적
 
@@ -54,8 +55,8 @@
 | 데이터접근(repositories/db) | `pg.Pool`을 이용한 파라미터화 SQL 실행, 결과 행(row)을 반환 | `pg` 라이브러리, DB 커넥션 풀 | 비즈니스 로직(BR 규칙 판단)을 포함하지 않는다 — 순수 CRUD만 담당 |
 
 - 의존 방향은 `라우터 → 컨트롤러 → 서비스 → 데이터접근`의 단방향으로 고정한다. 상위 레이어를 건너뛰어 호출하는 것(예: 컨트롤러에서 pg 쿼리 직접 실행)은 금지한다.
-- 소유자 기반 접근 제어(BR-2)는 데이터접근 계층의 SQL `WHERE user_id = $1` 조건과 서비스 계층의 명시적 소유권 검증을 함께 적용해 이중으로 보장한다.
-- ORM 미사용 제약에 따라 데이터접근 계층에서 반복되는 쿼리 패턴(예: `SELECT ... WHERE id = $1 AND user_id = $2`)은 공통 쿼리 헬퍼 함수로 추출해 중복을 최소화한다(PRD 7.4절 근거).
+- 소유자 기반 접근 제어(BR-2)는 서비스 계층에서 명시적으로 검증한다: 리소스를 `id`로 조회한 뒤 `user_id`가 요청자와 일치하는지 확인해 불일치 시 403을, 리소스 자체가 없으면 404를 반환한다. 목록 조회(`GET /api/todos`, `GET /api/categories`)는 데이터접근 계층에서도 `WHERE user_id = $1` 조건을 사용해 처음부터 본인 소유 행만 조회한다. 단건 조회·수정·삭제(`:id` 경로)의 데이터접근 계층 쿼리 자체에는 `user_id` 조건을 추가하지 않는다 — 서비스 계층 검증이 항상 그 앞에서 먼저 실행되므로 안전하지만, 데이터접근 계층 자체는 소유권을 모르는 순수 CRUD로 유지한다.
+- ORM 미사용 제약에 따라 데이터접근 계층에서 반복되는 쿼리 패턴은 공통 쿼리 헬퍼 함수로 추출해 중복을 최소화한다(PRD 7.4절 근거).
 
 ## 3. 코드/네이밍 원칙
 
@@ -133,6 +134,9 @@
 
 ### 5.7 헬스 체크
 - `GET /api/health` 엔드포인트를 두어 서버 및 DB 커넥션 풀 상태를 간단히 확인할 수 있도록 한다(배포·운영 점검용 최소 기능).
+
+### 5.8 API 문서(Swagger UI)
+- `backend/swagger.json`(OpenAPI 3.0 스펙)을 `swagger-ui-express`로 서빙한다. `NODE_ENV`가 `production`이 아닐 때만 `GET /api-docs`에 마운트되며, 운영 환경에서는 자동으로 비활성화된다.
 
 ## 6. 프론트엔드 디렉토리 구조
 
@@ -275,7 +279,7 @@ backend/
     │   ├── todoRoutes.js              # /api/todos/*
     │   ├── categoryRoutes.js          # /api/categories/*
     │   ├── userRoutes.js              # /api/users/*
-    │   └── healthRoutes.js            # /api/health
+    │   └── health.js                  # /api/health
     ├── controllers/                # 컨트롤러 계층(req/res 처리)
     │   ├── authController.js
     │   ├── todoController.js
@@ -301,20 +305,16 @@ backend/
     │   ├── jwt.js                     # access_token/refresh_token 서명·검증
     │   ├── password.js                # 비밀번호 해시/검증(bcrypt)
     │   └── ApiError.js                # 표준 에러 클래스(status, message)
-    ├── schemas/                    # 요청 바디 유효성 검증 스키마(zod/joi 등 경량 라이브러리 또는 수동 검증 함수)
-    │   ├── authSchema.js
-    │   ├── todoSchema.js
-    │   └── categorySchema.js
+    ├── schemas/                    # 요청 바디 유효성 검증 스키마(수동 검증 함수)
+    │   ├── authSchemas.js
+    │   ├── userSchemas.js
+    │   ├── categorySchemas.js
+    │   └── todoSchemas.js
     └── db/
-        ├── migrations/               # 순번 SQL 마이그레이션 파일(수동 관리)
-        │   ├── 001_create_users_table.sql
-        │   ├── 002_create_categories_table.sql
-        │   ├── 003_create_todos_table.sql
-        │   ├── 004_create_refresh_tokens_table.sql
-        │   └── 005_add_indexes.sql     # user_id, category_id 등 조회 빈도 높은 컬럼 인덱스(NFR-01 근거)
-        ├── migrate.js                 # 마이그레이션 순차 적용 스크립트
-        └── seed.js                    # 로컬 개발용 초기 데이터(선택)
+        └── migrations/               # (예약된 디렉토리, 아래 참고)
 ```
+
+- 2일 일정상 `db/migrate.js`/`db/seed.js`와 순번 SQL 마이그레이션 파일은 실제로 만들지 않았다. `docs/schema.sql` 단일 파일을 `psql`로 직접 적용하는 실용적 선택(DB-02 완료 조건에 명시된 대체 경로)을 그대로 따랐으며, `db/migrations/`는 향후 마이그레이션 도입 시를 대비한 빈 디렉토리로만 남아 있다.
 
 - `repositories/`는 각 테이블에 대응하는 CRUD 및 조회 함수만 담당하며, 소유자 조건(`WHERE user_id = $1`)을 기본으로 포함한다.
 - `services/`는 여러 `repositories`를 조합해 트랜잭션이 필요한 로직(예: 카테고리 삭제 시 할일 이관 BR-5)을 `pg.Pool.connect()`로 얻은 클라이언트에서 `BEGIN`/`COMMIT`/`ROLLBACK`으로 감싸 처리한다.
