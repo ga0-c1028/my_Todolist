@@ -337,19 +337,52 @@ FE-11 진행해줘
 이번 변경 내용으로 다시 실행해야할 plan.md의 내용이 있을까?
 
 092.
-응
-
-093.
 프론트엔드 개발 내역, 백엔드, DB 변경 사항까지 모두 포함하여 관련된 문서를 모두 업데이트해줘
 
-094.
+093.
 BE-11, FE-15등 plan 변경된 이후 생긴 것들에 대해 플랜 다시 진행해줘
 
+094.
+prompt_log.txt 에서 8, 9, 10, 16, 17, 39, 43, 45, 47 번 로그는 지워주고 다시 넘버링해서 저장해줘' 이 프롬프트 이후 프롬프트 내용 prompt_log.txt에 추가해서 넣어줘
+
 095.
-DB-03은 체크 완료처리가 왜 안됐어?
+commit push
 
 096.
-응 실행하고 완료해줘
+@docs/assets/w03-todo-list.svg 이 화면이랑 좀 다른 것 같은데 배경색이나 글씨 등 얘에 맞춰서 다시 조정해줄 수 있어?
 
 097.
-prompt_log.txt 에서 8, 9, 10, 16, 17, 39, 43, 45, 47 번 로그는 지워주고 다시 넘버링해서 저장해줘' 이 프롬프트 이후 프롬프트 내용 prompt_log.txt에 추가해서 넣어줘
+다크모드/라이트모드랑 다국어 처리 (ko/en/ja) 가능하게 해줘
+
+098.
+postgresql=mcp 도구를 이용해 연결한 local DB schema와 @docs/schema.sql 을 비교분석하여 불일치한 부분이 있는지 확인해줘
+
+099.
+커밋하고 푸시해줘
+
+100.
+health 체크 엔드포인트 주소 알려줘
+
+101.
+vercel에서 프론트엔드 배포하는데 아래와 같이 에러 떴어. (Vercel 빌드 로그 붙여넣기: `tsc -b && vite build` 단계에서 `src/shared/config/i18n/dictionaries.ts`의 en/ja 딕셔너리 각 필드마다 "Type 'X' is not assignable to type 'Y'"(TS2322) 에러가 100여 건 반복 발생, 마지막에 "Error: Command "npm run build" exited with 2"로 빌드 실패)
+
+102.
+https://todolist-lila-omega.vercel.app/에 대해 playwright mcp 도구를 사용해 사용자 시나리오를 기반으로 E2E 테스트해줘
+
+103.
+frontend 앱을 vercel에 배포하는데 fallback UI 설정 해줘
+
+104.
+frontend, backend vercel.json 내용 수정했는데 확인해보고 문제 없으면 commit 하고 push 해줘
+
+105.
+commit push 해줘
+
+106.
+frontend-prod.yaml 도 workflows 하위로 옮겼어. 확인하고 커밋푸시 진행해줘
+
+107.
+할 일 목록, 카테고리 관리 페이지도 회원 정보랑 똑같은 css 스타일로 변경해줄 수 있어? 배경 색이나 글씨체 같은거 다른부분 있으면 맞춰줘.
+
+108.
+커밋 푸시
