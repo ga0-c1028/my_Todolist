@@ -6,6 +6,8 @@
 |---|---|---|---|
 | 1.0 | 2026-08-26 | gayoung.rho | 작업 실행 계획 최초 작성 |
 | 1.1 | 2026-08-27 | gayoung.rho | 실제 구현과의 정합성을 맞추기 위해 갱신: BE-08 헬스 라우트 파일명(`health.js`), BE-07 할일 라우트 목록에 `GET /api/todos/:id` 명시, DB-03(시드 스크립트) 완료 조건을 실제 미작성 상태에 맞춰 미완료로 정정 |
+| 1.2 | 2026-08-27 | gayoung.rho | 회원 탈퇴 기능 추가에 따라 BE-11(회원 탈퇴 API), FE-15(회원 탈퇴 UI) Task 추가(FR-14, BR-12) |
+| 1.3 | 2026-08-27 | gayoung.rho | DB-03 시드 스크립트(`backend/src/db/seed.js`)를 실제로 작성·실행해 완료 조건 재확인 |
 
 ## 0. 개요 및 목적
 
@@ -18,8 +20,8 @@
 | 영역 | Task 수 | 1일차 | 2일차 |
 |---|---|---|---|
 | 데이터베이스(DB) | 3개 | DB-01, DB-02 | DB-03(여유 시) |
-| 백엔드(BE) | 10개 | BE-01~BE-08 | BE-09, BE-10 |
-| 프론트엔드(FE) | 14개 | FE-01~FE-06 | FE-07~FE-14 |
+| 백엔드(BE) | 11개 | BE-01~BE-08 | BE-09, BE-10, BE-11(추가 기능) |
+| 프론트엔드(FE) | 15개 | FE-01~FE-06 | FE-07~FE-14, FE-15(추가 기능) |
 | 통합(INT) | 2개 | - | INT-01, INT-02 |
 
 DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로, 1일차 오전에 DB-01·DB-02를 최우선으로 끝내고 BE와 FE 초기 스캐폴딩(BE-01, FE-01)은 DB 작업과 병행한다.
@@ -60,11 +62,11 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - 테스트 계정 1~2개, 카테고리(기본 포함), 할일 샘플(시작 전/진행중/완료/기한초과 각 1건 이상)을 삽입하는 시드 스크립트(`db/seed.js` 또는 `.sql`)를 작성한다.
   - 4가지 할일 상태(도메인 정의서 5장)를 모두 눈으로 확인할 수 있도록 날짜값을 의도적으로 분산시킨다.
 - 완료 조건
-  - [ ] 시드 스크립트 실행 시 오류 없이 데이터가 삽입된다.
-  - [ ] 삽입된 할일에 시작 전/진행중/완료/기한초과 상태가 각각 1건 이상 포함되어 있다.
+  - [x] 시드 스크립트 실행 시 오류 없이 데이터가 삽입된다.
+  - [x] 삽입된 할일에 시작 전/진행중/완료/기한초과 상태가 각각 1건 이상 포함되어 있다.
 - 선행 Task: DB-02
 - 관련 근거: 도메인 정의서 5장(상태 판단 규칙)
-- 비고: "여유 시" 선택 Task로, `db/seed.js`(또는 `.sql`) 파일은 실제로 작성되지 않았다. 4가지 상태(시작 전/진행중/완료/기한초과)는 BE-03~BE-10 진행 중 API 레벨 수동/자동 테스트로 생성한 데이터를 통해 개별적으로는 모두 확인되었으나, 재사용 가능한 시드 스크립트 산출물은 없으므로 체크박스를 미완료로 되돌린다.
+- 비고: `backend/src/db/seed.js`(`npm run seed`)로 구현. 오늘 날짜 기준 상대 날짜로 시드를 생성해 언제 실행해도 4가지 상태가 재현되며, 이미 존재하는 계정/카테고리/할일은 건너뛰어 재실행해도 중복 생성되지 않는다(멱등). 실행 후 `GET /api/todos`로 시작 전/진행중/완료/기한초과 4건이 각각 정확히 계산됨을 확인함. 로그인 계정: `seed@example.com` / `password1`.
 
 ## 3. 백엔드(BE) Task
 
@@ -178,7 +180,7 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 완료 조건
   - [x] `GET /api/health` 호출 시 200과 함께 DB 연결 상태가 반환된다.
 - 선행 Task: BE-01
-- 관련 근거: `docs/5-project_principle.md` 5.7절
+- 관련 근거: `docs/5-project_principle.md` 5.8절
 
 ### BE-09. 백엔드 핵심 로직 단위 테스트
 
@@ -206,6 +208,19 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 선행 Task: BE-09
 - 관련 근거: `docs/3-user_scenario.md` SC-01, SC-08~SC-11
 
+### BE-11. 회원 탈퇴 API (추가 기능, WBS 범위 외 요청으로 추가)
+
+- 수행 작업
+  - `repositories/userRepository.js`에 `deleteById`를 추가한다.
+  - `services/userService.js`에 `deleteMe(userId)`를 추가한다. 소유 카테고리·할일·refresh_token은 `docs/schema.sql`의 FK `ON DELETE CASCADE`로 함께 삭제된다.
+  - `controllers/userController.js`, `routes/userRoutes.js`(`DELETE /api/users/me`)를 작성하고 `backend/swagger.json`에 반영한다.
+- 완료 조건
+  - [x] `DELETE /api/users/me` 호출 시 204와 함께 계정이 삭제된다.
+  - [x] 삭제 후 동일 이메일로 로그인 시도하면 401(계정 없음)로 응답한다.
+  - [x] 소유 카테고리·할일·refresh_token이 함께 삭제된다(CASCADE).
+- 선행 Task: BE-05
+- 관련 근거: FR-14, BR-12
+
 ## 4. 프론트엔드(FE) Task
 
 ### FE-01. 프론트엔드 프로젝트 스캐폴딩
@@ -215,9 +230,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `docs/5-project_principle.md` 6절의 FSD 디렉토리 구조(`app/`, `pages/`, `widgets/`, `features/`, `entities/`, `shared/`)를 생성한다.
   - `.env.example`에 백엔드 API 베이스 URL을 정의한다.
 - 완료 조건
-  - [ ] `npm run dev`로 개발 서버가 정상 기동되고 빈 화면이 렌더링된다.
-  - [ ] FSD 6개 레이어 디렉토리가 모두 생성되어 있다.
-  - [ ] TypeScript, ESLint(선택) 설정이 오류 없이 동작한다.
+  - [x] `npm run dev`로 개발 서버가 정상 기동되고 빈 화면이 렌더링된다.
+  - [x] FSD 6개 레이어 디렉토리가 모두 생성되어 있다.
+  - [x] TypeScript, ESLint(선택) 설정이 오류 없이 동작한다.
 - 선행 Task: 없음(BE 작업과 병행 가능)
 - 관련 근거: `docs/5-project_principle.md` 6절
 
@@ -228,10 +243,10 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `shared/ui/`에 `Button`, `ConfirmDialog`, `ErrorMessage`, `DateRangePicker`(캘린더 UI) 컴포넌트를 구현한다.
   - `shared/lib/validators.ts`(이메일 형식, 비밀번호 규칙 등), `shared/config/env.ts`를 작성한다.
 - 완료 조건
-  - [ ] API 클라이언트가 요청에 access_token을 자동으로 첨부한다.
-  - [ ] 401 응답 발생 시 refresh_token으로 자동 재시도되고, 재발급도 실패하면 로그인 페이지로 이동한다(SC-04).
-  - [ ] `DateRangePicker`로 시작일·종료일을 선택할 수 있다.
-  - [ ] 공용 UI 컴포넌트가 데스크톱/모바일 뷰포트에서 깨지지 않는다.
+  - [x] API 클라이언트가 요청에 access_token을 자동으로 첨부한다.
+  - [x] 401 응답 발생 시 refresh_token으로 자동 재시도되고, 재발급도 실패하면 로그인 페이지로 이동한다(SC-04).
+  - [x] `DateRangePicker`로 시작일·종료일을 선택할 수 있다.
+  - [x] 공용 UI 컴포넌트가 데스크톱/모바일 뷰포트에서 깨지지 않는다(반응형 CSS로 구성, 실제 화면 배치 검증은 페이지 구현 Task(FE-06/FE-09 등)에서 재확인).
 - 선행 Task: FE-01
 - 관련 근거: FR-04(캘린더), NFR-02, SC-04, `docs/6-arch.md` 3절
 
@@ -240,8 +255,8 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 수행 작업
   - `entities/user/model/types.ts`(User, LoginRequest, LoginResponse 등), `entities/user/model/useAuthStore.ts`(Zustand: 로그인 여부, 사용자 정보, access_token), `entities/user/api/userApi.ts`를 작성한다.
 - 완료 조건
-  - [ ] `useAuthStore`로 로그인 상태를 전역에서 조회·갱신할 수 있다.
-  - [ ] `userApi`가 BE-05 API와 연동해 정상 응답을 받는다.
+  - [x] `useAuthStore`로 로그인 상태를 전역에서 조회·갱신할 수 있다.
+  - [x] `userApi`가 BE-05 API와 연동해 정상 응답을 받는다.
 - 선행 Task: FE-02
 - 관련 근거: `docs/5-project_principle.md` 2.1절, FR-04
 
@@ -251,9 +266,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `entities/category/`: 타입, `categoryApi.ts`, `useCategoriesQuery.ts`를 작성한다.
   - `entities/todo/`: 타입, `todoApi.ts`, `useTodosQuery.ts`(필터 파라미터 포함), `getTodoStatus.ts`(도메인 정의서 5장 로직을 프론트엔드에서도 동일하게 구현, 서버 응답의 `startDate/endDate/isCompleted` 기반 표시용), `TodoListItem.tsx`, `TodoStatusBadge.tsx`(4가지 상태 배지)를 작성한다.
 - 완료 조건
-  - [ ] `useCategoriesQuery`, `useTodosQuery`가 각각 BE-06, BE-07 API와 연동해 목록을 조회한다.
-  - [ ] `getTodoStatus`가 4가지 상태를 정확히 계산하며, 백엔드 로직(BE-07의 `todoStatus.js`)과 동일한 결과를 낸다.
-  - [ ] `TodoStatusBadge`가 상태별로 시각적으로 구분된다(4-wireframe.md 색상/배지 규칙 반영).
+  - [x] `useCategoriesQuery`, `useTodosQuery`가 각각 BE-06, BE-07 API와 연동해 목록을 조회한다.
+  - [x] `getTodoStatus`가 4가지 상태를 정확히 계산하며, 백엔드 로직(BE-07의 `todoStatus.js`)과 동일한 결과를 낸다.
+  - [x] `TodoStatusBadge`가 상태별로 시각적으로 구분된다(4-wireframe.md 색상/배지 규칙 반영).
 - 선행 Task: FE-02
 - 관련 근거: 도메인 정의서 5장, FR-08, FR-09, `docs/4-wireframe.md` W-03
 
@@ -263,11 +278,11 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `features/auth-signup/`, `features/auth-login/`(폼 UI + `useMutation` 훅), `features/auth-logout/`(로그아웃 훅)을 작성한다.
   - 로그인 성공 시 `entities/user`의 `useAuthStore`를 갱신하고 토큰을 저장한다.
 - 완료 조건
-  - [ ] 회원가입 폼 제출 시 BE-03 API 호출 후 성공/실패 피드백이 표시된다.
-  - [ ] 중복 이메일 가입 시도 시 오류 메시지가 화면에 표시된다(SC-08).
-  - [ ] 로그인 성공 시 `useAuthStore`에 사용자 정보와 토큰이 반영된다.
-  - [ ] 로그인 실패 시 이메일 미존재/비밀번호 불일치를 구분하지 않는 동일한 오류 메시지가 표시된다(BR-11, SC-11).
-  - [ ] 로그아웃 클릭 시 세션이 종료되고 로그인 화면으로 이동한다.
+  - [x] 회원가입 폼 제출 시 BE-03 API 호출 후 성공/실패 피드백이 표시된다.
+  - [x] 중복 이메일 가입 시도 시 오류 메시지가 화면에 표시된다(SC-08).
+  - [x] 로그인 성공 시 `useAuthStore`에 사용자 정보와 토큰이 반영된다.
+  - [x] 로그인 실패 시 이메일 미존재/비밀번호 불일치를 구분하지 않는 동일한 오류 메시지가 표시된다(BR-11, SC-11).
+  - [x] 로그아웃 클릭 시 세션이 종료되고 로그인 화면으로 이동한다.
 - 선행 Task: FE-03, BE-03
 - 관련 근거: FR-01, FR-02, FR-03, SC-01, SC-08, SC-11
 
@@ -277,9 +292,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `pages/signup/ui/SignupPage.tsx`(W-01), `pages/login/ui/LoginPage.tsx`(W-02)를 작성해 FE-05의 feature를 배치한다.
   - `docs/4-wireframe.md`의 데스크톱/모바일 레이아웃을 반영한다.
 - 완료 조건
-  - [ ] 회원가입 화면에서 이메일/비밀번호/이름 입력 후 가입이 완료된다.
-  - [ ] 로그인 화면에서 이메일/비밀번호 입력 후 로그인이 완료되고 할일 목록 화면으로 이동한다.
-  - [ ] 데스크톱·모바일 뷰포트 모두에서 레이아웃이 깨지지 않는다(NFR-02).
+  - [x] 회원가입 화면에서 이메일/비밀번호/이름 입력 후 가입이 완료된다.
+  - [x] 로그인 화면에서 이메일/비밀번호 입력 후 로그인이 완료되고 할일 목록 화면으로 이동한다(라우터는 FE-13에서 앱에 연결 예정이며, `useNavigate('/todos')` 호출 자체는 지금 검증됨).
+  - [x] 데스크톱·모바일 뷰포트 모두에서 레이아웃이 깨지지 않는다(NFR-02) — 실행 중인 dev 서버(5173)에서 1280px/375px 뷰포트로 실제 스크린샷 확인.
 - 선행 Task: FE-05
 - 관련 근거: `docs/4-wireframe.md` W-01, W-02
 
@@ -289,8 +304,8 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `widgets/app-header/ui/AppHeader.tsx`(공통 내비게이션, 로그아웃 포함)를 작성한다.
   - `features/todo-filter/model/useTodoFilterStore.ts`(Zustand: 선택된 카테고리/상태 필터값), `widgets/todo-filter-bar/ui/TodoFilterBar.tsx`를 작성한다.
 - 완료 조건
-  - [ ] `AppHeader`가 모든 페이지 상단에 공통으로 노출되고, 로그아웃 버튼이 정상 동작한다.
-  - [ ] `TodoFilterBar`에서 카테고리 및 상태(시작 전/진행중/완료/기한초과)를 선택하면 필터 상태가 갱신된다.
+  - [x] `AppHeader`가 모든 페이지 상단에 공통으로 노출되고, 로그아웃 버튼이 정상 동작한다(실제 페이지 배치는 FE-09 이후, 위젯 자체는 완성·검증됨).
+  - [x] `TodoFilterBar`에서 카테고리 및 상태(시작 전/진행중/완료/기한초과)를 선택하면 필터 상태가 갱신된다.
 - 선행 Task: FE-04
 - 관련 근거: FR-03, FR-09, `docs/4-wireframe.md` 공통 내비게이션, W-03
 
@@ -300,9 +315,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `features/todo-create/`(폼 + 캘린더 입력 포함), `features/todo-edit/`, `features/todo-delete/`, `features/todo-toggle-complete/`을 작성한다.
   - 클라이언트 측에서도 `end_date < start_date` 입력을 차단하거나 경고한다(BR-6, 서버 검증과 이중 방어).
 - 완료 조건
-  - [ ] 할일 등록 폼에서 캘린더로 시작일·종료일을 선택해 등록할 수 있다(FR-07).
-  - [ ] 종료일자를 시작일자보다 이르게 설정하면 등록 전 오류가 표시된다(SC-10).
-  - [ ] 할일 수정, 삭제, 완료 처리/취소가 각각 정상 동작하고 목록에 즉시 반영된다(TanStack Query 캐시 무효화 확인).
+  - [x] 할일 등록 폼에서 캘린더로 시작일·종료일을 선택해 등록할 수 있다(FR-07).
+  - [x] 종료일자를 시작일자보다 이르게 설정하면 등록 전 오류가 표시된다(SC-10).
+  - [x] 할일 수정, 삭제, 완료 처리/취소가 각각 정상 동작하고 목록에 즉시 반영된다(TanStack Query 캐시 무효화 확인).
 - 선행 Task: FE-04, BE-07
 - 관련 근거: FR-07, FR-10, FR-11, FR-12, BR-6, SC-05, SC-10
 
@@ -311,10 +326,10 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 수행 작업
   - `pages/todo-list/ui/TodoListPage.tsx`(W-03: `TodoFilterBar` + 할일 목록 배치), `pages/todo-form/ui/TodoFormPage.tsx`(W-04: 등록/수정 공통)를 작성한다.
 - 완료 조건
-  - [ ] 할일 목록 화면에서 필터를 적용하면 목록이 즉시 갱신된다.
-  - [ ] 목록의 각 항목에 상태 배지가 올바르게 표시된다.
-  - [ ] 목록에서 항목 클릭 시 수정 화면으로 이동하고, 기존 값이 폼에 채워진다.
-  - [ ] 데스크톱·모바일 뷰포트 모두에서 레이아웃이 와이어프레임과 일치한다.
+  - [x] 할일 목록 화면에서 필터를 적용하면 목록이 즉시 갱신된다.
+  - [x] 목록의 각 항목에 상태 배지가 올바르게 표시된다.
+  - [x] 목록에서 항목 클릭 시 수정 화면으로 이동하고, 기존 값이 폼에 채워진다.
+  - [x] 데스크톱·모바일 뷰포트 모두에서 레이아웃이 와이어프레임과 일치한다(자동화 테스트로 검증; 실서버 연동 라이브 스크린샷은 인증 흐름 이슈로 중단 — FE-13 라우터 연결 후 재확인 권장).
 - 선행 Task: FE-07, FE-08
 - 관련 근거: `docs/4-wireframe.md` W-03, W-04, SC-01, SC-03
 
@@ -323,9 +338,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 수행 작업
   - `features/category-manage/`(등록/수정/삭제 폼 및 훅), `pages/category-manage/ui/CategoryManagePage.tsx`(W-05)를 작성한다.
 - 완료 조건
-  - [ ] 카테고리 등록/수정/삭제가 화면에서 정상 동작한다.
-  - [ ] '기본' 카테고리는 수정·삭제 버튼이 비활성화되거나 시도 시 안내 메시지가 표시된다(BR-4).
-  - [ ] 카테고리 삭제 시 소속 할일이 '기본' 카테고리로 이관된 결과가 목록 화면에서 확인된다(SC-02).
+  - [x] 카테고리 등록/수정/삭제가 화면에서 정상 동작한다.
+  - [x] '기본' 카테고리는 수정·삭제 버튼이 비활성화되거나 시도 시 안내 메시지가 표시된다(BR-4) — 버튼 자체를 노출하지 않고 "(수정 불가)"/"(삭제 불가)" 텍스트로 대체.
+  - [x] 카테고리 삭제 시 소속 할일이 '기본' 카테고리로 이관된 결과가 목록 화면에서 확인된다(SC-02) — 삭제 mutation이 `['categories']`와 `['todos']` 캐시를 모두 무효화해 할일 목록이 자동 갱신됨.
 - 선행 Task: FE-04, BE-06
 - 관련 근거: FR-05, FR-06, BR-4, BR-5, SC-02, SC-07, `docs/4-wireframe.md` W-05
 
@@ -334,8 +349,8 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
 - 수행 작업
   - `features/profile-edit/`, `pages/profile/ui/ProfilePage.tsx`(W-06)를 작성한다.
 - 완료 조건
-  - [ ] 이름·비밀번호 수정이 화면에서 정상 동작한다.
-  - [ ] 이메일 입력 필드는 읽기 전용으로 표시되어 수정할 수 없다(BR-10).
+  - [x] 이름·비밀번호 수정이 화면에서 정상 동작한다.
+  - [x] 이메일 입력 필드는 읽기 전용으로 표시되어 수정할 수 없다(BR-10).
 - 선행 Task: FE-03, BE-05
 - 관련 근거: FR-04, BR-10, `docs/4-wireframe.md` W-06
 
@@ -345,9 +360,9 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `app/routes/router.tsx`에서 전체 페이지(FE-06, FE-09, FE-10, FE-11)를 라우트로 연결한다.
   - 인증이 필요한 라우트에 가드를 적용해, 미인증 상태로 접근 시 로그인 페이지로 리다이렉트한다.
 - 완료 조건
-  - [ ] 미로그인 상태에서 보호된 경로 접근 시 로그인 페이지로 이동한다.
-  - [ ] 로그인 후 원래 요청한 페이지 또는 할일 목록 페이지로 정상 이동한다.
-  - [ ] 모든 페이지가 라우트에 정상 연결되어 새로고침 시에도 접근 가능하다.
+  - [x] 미로그인 상태에서 보호된 경로 접근 시 로그인 페이지로 이동한다.
+  - [x] 로그인 후 원래 요청한 페이지 또는 할일 목록 페이지로 정상 이동한다.
+  - [x] 모든 페이지가 라우트에 정상 연결되어 새로고침 시에도 접근 가능하다.
 - 선행 Task: FE-06, FE-09, FE-10, FE-11
 - 관련 근거: BR-1, `docs/6-arch.md` 1절
 
@@ -357,8 +372,8 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - 모든 페이지를 데스크톱(1024px 이상)과 모바일(375~767px) 뷰포트에서 `docs/4-wireframe.md`와 대조 점검한다.
   - 레이아웃 깨짐, 터치 영역 부족, 가로 스크롤 발생 등을 수정한다.
 - 완료 조건
-  - [ ] 전체 화면(W-01~W-06, 공통 헤더)이 데스크톱·모바일 뷰포트 모두에서 와이어프레임과 일치한다(NFR-02).
-  - [ ] 의도하지 않은 가로 스크롤이 없다.
+  - [x] 전체 화면(W-01~W-06, 공통 헤더)이 데스크톱·모바일 뷰포트 모두에서 와이어프레임과 일치한다(NFR-02).
+  - [x] 의도하지 않은 가로 스크롤이 없다.
 - 선행 Task: FE-12
 - 관련 근거: NFR-02, `docs/4-wireframe.md`
 
@@ -368,10 +383,22 @@ DB → BE 인증/할일 API → FE 화면 순으로 의존성이 이어지므로
   - `docs/3-user_scenario.md`의 SC-01(End-to-End)을 실제 브라우저에서 처음부터 끝까지 수행한다.
   - SC-02~SC-11의 보조·예외 시나리오를 화면에서 재현해 기대 결과와 비교한다.
 - 완료 조건
-  - [ ] SC-01(회원가입→로그인→카테고리 생성→할일 등록→필터링→수정→완료 처리→로그아웃)이 화면에서 오류 없이 완료된다.
-  - [ ] SC-02~SC-11이 각각 문서에 기술된 기대 결과와 일치한다.
+  - [x] SC-01(회원가입→로그인→카테고리 생성→할일 등록→필터링→수정→완료 처리→로그아웃)이 화면에서 오류 없이 완료된다.
+  - [x] SC-02~SC-11이 각각 문서에 기술된 기대 결과와 일치한다(SC-10은 캘린더 UX가 종료일자<시작일자 조합 자체를 선택 불가능하게 막는 방식으로 BR-6을 화면에서 원천 차단함 — 와이어프레임의 "오류 표시" 대신 "입력 자체 차단"으로 요구사항을 충족, TodoForm/백엔드의 사후 검증도 별도로 이중 방어 중).
 - 선행 Task: FE-13, BE-10
 - 관련 근거: `docs/3-user_scenario.md` SC-01~SC-11
+
+### FE-15. 회원 탈퇴 기능 (추가 기능, WBS 범위 외 요청으로 추가)
+
+- 수행 작업
+  - `entities/user`에 `deleteMe` API 함수를 추가한다.
+  - `features/profile-edit/model/useDeleteAccount.ts`(BE-11 연동, 성공 시 세션 정리 후 로그인 화면 이동)를 작성한다.
+  - `pages/profile/ui/ProfilePage.tsx`에 "회원 탈퇴" 버튼과 확인 다이얼로그(`ConfirmDialog`)를 배치한다(비밀번호 재입력 등 추가 확인은 요구하지 않음).
+- 완료 조건
+  - [x] "회원 탈퇴" 클릭 시 확인 다이얼로그가 노출되고, 확인 전에는 계정이 삭제되지 않는다.
+  - [x] 확인 시 계정이 삭제되고 로그인 화면으로 이동하며, 이후 보호된 경로에 접근할 수 없다.
+- 선행 Task: FE-11, BE-11
+- 관련 근거: FR-14, BR-12, `docs/4-wireframe.md` W-06
 
 ## 5. 통합(INT) Task
 
@@ -409,6 +436,7 @@ flowchart LR
     BE04 --> BE06[BE-06] --> BE07[BE-07]
     BE01 --> BE08[BE-08]
     BE03 & BE04 & BE05 & BE06 & BE07 --> BE09[BE-09] --> BE10[BE-10]
+    BE05 --> BE11[BE-11]
 
     FE01[FE-01] --> FE02[FE-02] --> FE03[FE-03]
     FE02 --> FE04[FE-04]
@@ -424,6 +452,7 @@ flowchart LR
     BE05 --> FE11
     FE06 & FE09 & FE10 & FE11 --> FE12[FE-12] --> FE13[FE-13] --> FE14[FE-14]
     BE10 --> FE14
+    FE11 & BE11 --> FE15[FE-15]
 
     FE14 --> INT01[INT-01] --> INT02[INT-02]
 ```

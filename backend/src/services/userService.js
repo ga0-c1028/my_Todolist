@@ -16,4 +16,9 @@ async function updateMe(userId, { name, password }, deps = defaultDeps) {
   };
 }
 
-module.exports = { updateMe };
+async function deleteMe(userId, deps = defaultDeps) {
+  await deps.userRepository.deleteById(userId);
+  console.log('[user] 회원 탈퇴:', userId);
+}
+
+module.exports = { updateMe, deleteMe };

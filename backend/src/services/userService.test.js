@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { updateMe } = require('./userService');
+const { updateMe, deleteMe } = require('./userService');
 
 function buildBaseDeps(overrides = {}) {
   return {
@@ -97,4 +97,19 @@ test('updateMe는 name 없이 password만 있어도 동작하며 기존 reposito
   assert.equal(result.name, '기존이름');
   assert.ok(!('password' in result));
   assert.ok(!('password_hash' in result));
+});
+
+test('deleteMe는 userRepository.deleteById를 해당 userId로 호출한다', async () => {
+  let receivedId = null;
+  const deps = {
+    userRepository: {
+      deleteById: async (id) => {
+        receivedId = id;
+      },
+    },
+  };
+
+  await deleteMe('u1', deps);
+
+  assert.equal(receivedId, 'u1');
 });

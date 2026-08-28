@@ -1,0 +1,37 @@
+.todo-list-page__content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.todo-list-page__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.todo-list-page__items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.todo-list-page__empty {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 48px 0;
+}
+
+@media (max-width: 767px) {
+  .todo-list-page__content {
+    padding: 24px 16px;
+  }
+
+  .todo-list-page__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

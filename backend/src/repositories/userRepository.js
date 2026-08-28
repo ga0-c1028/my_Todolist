@@ -33,4 +33,8 @@ async function updateById(id, { name, passwordHash }, db = pool) {
   return result.rows[0];
 }
 
-module.exports = { findByEmail, create, findById, updateById };
+async function deleteById(id, db = pool) {
+  await db.query('DELETE FROM users WHERE id = $1', [id]);
+}
+
+module.exports = { findByEmail, create, findById, updateById, deleteById };

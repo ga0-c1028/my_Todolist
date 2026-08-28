@@ -1,0 +1,30 @@
+.button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--color-ink);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  padding: 10px 20px;
+}
+
+.button--primary:hover {
+  background: var(--color-accent);
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border: none;
+  padding: 0;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.button--secondary:hover {
+  color: var(--color-accent);
+}

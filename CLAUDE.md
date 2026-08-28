@@ -17,6 +17,7 @@
 | 기술 아키텍처 다이어그램 | `docs/6-arch.md` | 전체 시스템 구성도, 백엔드 요청 처리 흐름, JWT 인증 흐름을 mermaid로 표현한 문서 |
 | ERD | `docs/7-erd.md` | users/categories/todos/refresh_tokens 테이블의 컬럼·제약·관계를 mermaid erDiagram으로 정의한 문서 |
 | 작업 실행 계획(WBS) | `docs/8-plan.md` | DB/백엔드/프론트엔드/통합 단위의 Task 목록과 완료 조건, 선행 관계를 정의한 실행 계획서 |
+| 디자인 스타일 가이드 | `docs/9-style.md` | 컬러 팔레트, 타이포그래피, 레이아웃/컴포넌트 원칙, 캘린더 컴포넌트 스타일을 정의한 프론트엔드 디자인 가이드 |
 | DB 스키마 DDL | `docs/schema.sql` | ERD를 기반으로 작성한 PostgreSQL 17용 테이블 생성 DDL 스크립트 |
 | API 스펙 | `backend/swagger.json` | 회원/카테고리/할일/인증 API의 엔드포인트, 요청·응답 스키마를 정의한 OpenAPI(Swagger) 명세 |
 

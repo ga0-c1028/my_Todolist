@@ -1,0 +1,29 @@
+:root {
+  /* docs/9-style.md 2절 컬러 팔레트 */
+  --color-primary: #f2b705;
+  --color-primary-dark: #d9a200;
+  --color-accent: #f03a9b;
+  --color-ink: #111111;
+  --color-surface: #faf6ee;
+  --color-border: #111111;
+  --color-danger: #e5484d;
+  --color-info: #2e6ade;
+  --color-muted: #6b6558;
+
+  color-scheme: light;
+  font-family: 'Pretendard', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+#root {
+  min-height: 100svh;
+}

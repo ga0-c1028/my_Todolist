@@ -1,0 +1,140 @@
+.date-range-picker {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.date-range-picker__triggers {
+  display: flex;
+  gap: 8px;
+}
+
+.date-range-picker__trigger {
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .date-range-picker__triggers {
+    flex-direction: column;
+  }
+
+  .date-range-picker__trigger {
+    white-space: normal;
+    width: 100%;
+  }
+
+  .date-range-picker__popover {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.date-range-picker__popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  padding: 16px;
+  width: 280px;
+}
+
+.date-range-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.date-range-picker__nav {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-ink);
+  padding: 4px 8px;
+}
+
+.date-range-picker__month-title {
+  font-family: 'Gaegu', 'Nanum Pen Script', cursive;
+  font-size: 28px;
+}
+
+.date-range-picker__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.date-range-picker__weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.date-range-picker__weekday--sun {
+  background: var(--color-danger);
+}
+
+.date-range-picker__weekday--sat {
+  background: var(--color-info);
+}
+
+.date-range-picker__weekday--weekday {
+  background: var(--color-ink);
+}
+
+.date-range-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.date-range-picker__cell {
+  background: #ffffff;
+  border: 1px solid var(--color-ink);
+  border-radius: 10px;
+  aspect-ratio: 1;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+
+.date-range-picker__cell--blank {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.date-range-picker__cell--sun {
+  color: var(--color-danger);
+}
+
+.date-range-picker__cell--sat {
+  color: var(--color-info);
+}
+
+.date-range-picker__cell--in-range {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+.date-range-picker__cell--today {
+  border: 2px solid var(--color-ink);
+}

@@ -1,0 +1,85 @@
+.todo-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 12px;
+}
+
+.todo-filter-bar__group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-filter-bar__label {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.todo-filter-bar__select,
+.todo-filter-bar__status-select {
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+
+.todo-filter-bar__status-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.todo-filter-bar__status-select {
+  display: none;
+}
+
+.todo-filter-bar__status-button {
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.todo-filter-bar__status-button--active {
+  background: var(--color-ink);
+  color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .todo-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .todo-filter-bar__group {
+    justify-content: space-between;
+  }
+
+  .todo-filter-bar__select,
+  .todo-filter-bar__status-select {
+    flex: 1;
+  }
+
+  .todo-filter-bar__status-buttons {
+    display: none;
+  }
+
+  .todo-filter-bar__status-select {
+    display: block;
+  }
+}

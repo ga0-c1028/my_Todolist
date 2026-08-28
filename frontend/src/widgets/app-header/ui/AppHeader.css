@@ -1,0 +1,142 @@
+.app-header {
+  position: relative;
+  background: var(--color-surface);
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.app-header__brand {
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.app-header__desktop {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 12px 24px;
+}
+
+.app-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+
+.app-header__nav-link {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+.app-header__nav-link--active {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.app-header__user {
+  position: relative;
+}
+
+.app-header__user-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.app-header__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 160px;
+}
+
+.app-header__dropdown-item {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 14px;
+  color: var(--color-ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-header__dropdown-item:hover {
+  background: var(--color-primary);
+}
+
+.app-header__mobile {
+  display: none;
+}
+
+.app-header__mobile-overlay {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .app-header__desktop {
+    display: none;
+  }
+
+  .app-header__mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .app-header__hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--color-ink);
+    padding: 4px 8px;
+  }
+
+  .app-header__user-indicator {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .app-header__mobile-overlay {
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--color-ink);
+  }
+
+  .app-header__mobile-item {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-ink);
+    text-align: left;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 15px;
+    color: var(--color-ink);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .app-header__mobile-item:last-child {
+    border-bottom: none;
+  }
+}

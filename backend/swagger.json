@@ -585,7 +585,7 @@
           "Health"
         ],
         "summary": "헬스 체크",
-        "description": "서버 및 DB 커넥션 풀 상태를 확인한다. 인증 불필요(BR-1 예외, project_principle.md 5.7절).",
+        "description": "서버 및 DB 커넥션 풀 상태를 확인한다. 인증 불필요(BR-1 예외, project_principle.md 5.8절).",
         "security": [],
         "responses": {
           "200": {
@@ -812,6 +812,26 @@
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "회원 탈퇴",
+        "description": "로그인한 사용자 본인의 계정을 영구히 삭제한다. 소유한 카테고리·할일·refresh_token은 DB 외래키 CASCADE로 함께 삭제된다.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "탈퇴 성공(본문 없음)"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

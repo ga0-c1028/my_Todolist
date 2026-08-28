@@ -5,7 +5,7 @@ if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/testdb_userRepository';
 }
 
-const { findByEmail, create, findById, updateById } = require('./userRepository');
+const { findByEmail, create, findById, updateById, deleteById } = require('./userRepository');
 
 test('findByEmail은 db.query를 email로 호출하고 rows[0]을 반환한다', async () => {
   const fakeUser = { id: 'u1', email: 'a@b.com', password_hash: 'hash', name: '홍길동' };
@@ -92,4 +92,18 @@ test('updateById는 결과가 없으면 undefined를 반환한다', async () => 
   const db = { query: async () => ({ rows: [] }) };
   const result = await updateById('nope', { name: 'x' }, db);
   assert.equal(result, undefined);
+});
+
+test('deleteById는 db.query를 DELETE 문으로 id와 함께 호출한다', async () => {
+  let calledWith = null;
+  const db = {
+    query: async (sql, params) => {
+      calledWith = { sql, params };
+      return { rows: [] };
+    },
+  };
+  await deleteById('u1', db);
+  assert.ok(calledWith.sql.includes('DELETE FROM users'));
+  assert.ok(calledWith.sql.includes('WHERE id = $1'));
+  assert.deepEqual(calledWith.params, ['u1']);
 });

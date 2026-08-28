@@ -5,5 +5,6 @@ const { validateUpdateUser } = require('../schemas/userSchemas');
 const controller = require('../controllers/userController');
 
 router.patch('/users/me', authenticate, validate(validateUpdateUser), controller.updateMe);
+router.delete('/users/me', authenticate, controller.deleteMe);
 
 module.exports = router;

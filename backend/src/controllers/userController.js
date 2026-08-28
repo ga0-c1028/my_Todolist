@@ -9,4 +9,13 @@ async function updateMe(req, res, next) {
   }
 }
 
-module.exports = { updateMe };
+async function deleteMe(req, res, next) {
+  try {
+    await userService.deleteMe(req.user.id);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { updateMe, deleteMe };

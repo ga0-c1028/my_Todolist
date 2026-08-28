@@ -7,6 +7,8 @@
 | 1.0 | 2026-08-26 | gayoung.rho | 프로젝트 구조 설계 원칙 최초 작성 |
 | 1.1 | 2026-08-26 | gayoung.rho | 프론트엔드 디렉토리 구조를 Feature-Sliced Design(FSD)으로 재설계 |
 | 1.2 | 2026-08-27 | gayoung.rho | 실제 백엔드 구현과의 정합성을 맞추기 위해 갱신: 헬스 라우트 파일명(`health.js`), `schemas/` 실제 파일명(복수형 4개), `db/` 하위 마이그레이션·시드 스크립트 미작성 사실 반영, BR-2 소유권 검증을 서비스 계층 단일 검증으로 명확화, Swagger UI(`/api-docs`, 비운영 환경 한정) 절 추가 |
+| 1.3 | 2026-08-27 | gayoung.rho | 실제 프론트엔드 구현(FE-01~FE-15)과의 정합성을 맞추기 위해 갱신: §6 트리에 `app/routes/RequireAuth.tsx`·`app/test-setup.ts`·`shared/*/index.ts`·`useDeleteAccount.ts` 반영, §4 프론트엔드 테스트 도구를 "권장"에서 Vitest+Testing Library "채택"으로 확정, §5에 5.7 날짜/타임존 처리 원칙 신설(이후 절 번호 한 칸씩 밀림: 헬스체크 5.8, Swagger UI 5.9) |
+| 1.4 | 2026-08-27 | gayoung.rho | DB-03에서 `db/seed.js`를 실제로 작성함에 따라 §7 `db/` 트리 및 관련 설명 갱신 |
 
 ## 0. 개요 및 목적
 
@@ -95,9 +97,9 @@
 | 필수 | 기본 카테고리 처리 로직(BR-3, BR-4, BR-5: 미지정 시 기본 지정, 기본 카테고리 삭제 불가, 삭제 시 할일 이관) | 카테고리 삭제 시 할일 유실 여부가 걸린 로직으로 SC-02의 핵심 검증 대상이다. |
 | 필수 | JWT 인증/인가 미들웨어(BR-1: 미인증 401, 토큰 재발급 예외) | 전체 API의 진입 관문으로 오류 시 전 기능이 영향을 받는다. |
 | 권장(여유 시) | 회원가입/로그인 시 이메일 중복(BR-9)·로그인 실패 공통 메시지(BR-11) 검증 | SC-08, SC-11 예외 흐름의 핵심 규칙이나, 위 필수 항목 대비 우선순위가 낮다. |
-| 생략 가능 | UI 컴포넌트 스냅샷 테스트, E2E 자동화 테스트 | 1인 개발·2일 일정에서 수동 시나리오 점검(3-user_scenario.md의 SC-01~SC-11)으로 대체한다. |
+| 생략 가능 | UI 컴포넌트 스냅샷 테스트, E2E 자동화 테스트 | 1인 개발·2일 일정에서 수동 시나리오 점검(3-user_scenario.md의 SC-01~SC-11)으로 대체한다. 단, 인증 가드(`RequireAuth`)처럼 보안에 직결되는 컴포넌트는 예외로 동작 테스트를 작성한다. |
 
-- 테스트 도구는 백엔드는 Node.js 기본 테스트 러너(`node:test`) 또는 최소 설정의 경량 프레임워크를, 프론트엔드는 핵심 유틸 함수(상태 계산 등) 위주로 Vitest를 사용하는 것을 권장한다. 별도 설정 없이 기존 스택에서 바로 사용 가능한 도구를 우선한다.
+- 테스트 도구는 백엔드는 Node.js 기본 테스트 러너(`node:test`)를, 프론트엔드는 Vitest + React Testing Library(`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`)를 채택했다. 핵심 유틸 함수(상태 계산 등)뿐 아니라 폼·페이지·인증 가드 등 실제 사용자 상호작용이 걸린 컴포넌트도 이 스택으로 테스트한다.
 - 테스트는 서비스 계층(비즈니스 로직)을 대상으로 작성하고, 컨트롤러·라우터·DB 통합 테스트는 시간이 남을 때만 추가한다. 이유는 서비스 계층이 BR 규칙을 담고 있어 회귀 발생 시 영향이 가장 크기 때문이다.
 - 배포 전 최소 기준: 위 "필수" 항목이 통과하고, `docs/3-user_scenario.md`의 SC-01(End-to-End)을 수동으로 1회 재현해 정상 동작을 확인한다.
 
@@ -132,10 +134,14 @@
 - 에러 발생 시 스택 트레이스는 서버 로그에만 남기고, 클라이언트 응답에는 노출하지 않는다(내부 구현 노출 방지).
 - 별도의 로그 수집 인프라(ELK 등) 구축은 2일 일정상 범위를 벗어나므로, `console` 기반 출력 또는 경량 로깅 라이브러리(예: `pino`) 중 설정이 간단한 쪽을 선택해 표준 출력으로 남기는 수준을 최소 기준으로 한다.
 
-### 5.7 헬스 체크
+### 5.7 날짜/타임존 처리
+- `pg`는 `DATE` 컬럼을 서버 로컬 타임존 기준 자정의 `Date` 객체로 반환한다. 이를 `'YYYY-MM-DD'` 문자열로 변환할 때 `Date.prototype.toISOString()`(UTC 변환)을 사용하면, 서버가 UTC+9 등 UTC를 벗어난 타임존에서 실행될 경우 날짜가 하루 어긋나는 버그가 발생한다(BE-07 `todoStatus.js`에서 실제 발생·수정됨).
+- 날짜만 다루는 값은 항상 `getFullYear()`/`getMonth()`/`getDate()`(로컬 기준) 조합으로 문자열을 만들고, `toISOString()`/`toUTCString()` 등 UTC 변환 API는 날짜 전용 값에 사용하지 않는다. 이 원칙은 백엔드(`todoStatus.js`)와 프론트엔드(`entities/todo/model/getTodoStatus.ts`, `shared/ui/DateRangePicker.tsx`) 모두에 동일하게 적용한다.
+
+### 5.8 헬스 체크
 - `GET /api/health` 엔드포인트를 두어 서버 및 DB 커넥션 풀 상태를 간단히 확인할 수 있도록 한다(배포·운영 점검용 최소 기능).
 
-### 5.8 API 문서(Swagger UI)
+### 5.9 API 문서(Swagger UI)
 - `backend/swagger.json`(OpenAPI 3.0 스펙)을 `swagger-ui-express`로 서빙한다. `NODE_ENV`가 `production`이 아닐 때만 `GET /api-docs`에 마운트되며, 운영 환경에서는 자동으로 비활성화된다.
 
 ## 6. 프론트엔드 디렉토리 구조
@@ -156,9 +162,11 @@ frontend/
     │   ├── providers/
     │   │   └── QueryProvider.tsx            # TanStack Query 클라이언트 프로바이더
     │   ├── routes/
-    │   │   └── router.tsx                   # 라우트-페이지 매핑, 인증 가드
-    │   └── styles/
-    │       └── global.css
+    │   │   ├── router.tsx                    # 라우트-페이지 매핑(createBrowserRouter)
+    │   │   └── RequireAuth.tsx               # 인증 가드: 미인증 시 로그인 화면으로 리다이렉트
+    │   ├── styles/
+    │   │   └── global.css
+    │   └── test-setup.ts                    # Vitest 전역 설정(jest-dom matcher, RTL cleanup)
     │
     ├── pages/                           # pages 레이어: 화면 단위(와이어프레임 W-01~W-06)
     │   ├── signup/
@@ -223,6 +231,7 @@ frontend/
     │   └── profile-edit/
     │       ├── ui/ProfileForm.tsx
     │       ├── model/useUpdateProfile.ts
+    │       ├── model/useDeleteAccount.ts     # 회원 탈퇴(FR-14, BR-12)
     │       └── index.ts
     │
     ├── entities/                        # entities 레이어: 도메인 엔티티(User/Category/Todo)
@@ -247,16 +256,20 @@ frontend/
     │
     └── shared/                          # shared 레이어: 도메인에 속하지 않는 공통 자원
         ├── api/
-        │   └── client.ts                   # axios/fetch 인스턴스, 인터셉터(토큰 첨부, 401 재발급)
+        │   ├── client.ts                   # fetch 인스턴스, 인터셉터(토큰 첨부, 401 재발급), ApiError/parseJsonOrThrow
+        │   └── index.ts
         ├── config/
-        │   └── env.ts                      # import.meta.env 파싱
+        │   ├── env.ts                      # import.meta.env 파싱
+        │   └── index.ts
         ├── lib/
-        │   └── validators.ts                # 이메일 형식, 비밀번호 규칙 등 순수 검증 함수
+        │   ├── validators.ts                # 이메일 형식, 비밀번호 규칙 등 순수 검증 함수
+        │   └── index.ts
         └── ui/
             ├── Button.tsx
             ├── ConfirmDialog.tsx
             ├── ErrorMessage.tsx
-            └── DateRangePicker.tsx          # 캘린더 UI(도메인 특정성 없는 범용 컴포넌트)
+            ├── DateRangePicker.tsx          # 캘린더 UI(도메인 특정성 없는 범용 컴포넌트)
+            └── index.ts
 ```
 
 ## 7. 백엔드 디렉토리 구조
@@ -311,10 +324,11 @@ backend/
     │   ├── categorySchemas.js
     │   └── todoSchemas.js
     └── db/
-        └── migrations/               # (예약된 디렉토리, 아래 참고)
+        ├── migrations/               # (예약된 디렉토리, 아래 참고)
+        └── seed.js                  # 로컬 개발용 시드 스크립트(`npm run seed`, DB-03)
 ```
 
-- 2일 일정상 `db/migrate.js`/`db/seed.js`와 순번 SQL 마이그레이션 파일은 실제로 만들지 않았다. `docs/schema.sql` 단일 파일을 `psql`로 직접 적용하는 실용적 선택(DB-02 완료 조건에 명시된 대체 경로)을 그대로 따랐으며, `db/migrations/`는 향후 마이그레이션 도입 시를 대비한 빈 디렉토리로만 남아 있다.
+- 2일 일정상 `db/migrate.js`와 순번 SQL 마이그레이션 파일은 실제로 만들지 않았다. `docs/schema.sql` 단일 파일을 `psql`로 직접 적용하는 실용적 선택(DB-02 완료 조건에 명시된 대체 경로)을 그대로 따랐으며, `db/migrations/`는 향후 마이그레이션 도입 시를 대비한 빈 디렉토리로만 남아 있다. `db/seed.js`는 DB-03에서 실제로 작성했다 — 오늘 날짜 기준 상대 날짜로 할일을 생성해 재실행해도 4가지 상태가 항상 재현되며, 이미 존재하는 데이터는 건너뛰어 멱등하게 동작한다.
 
 - `repositories/`는 각 테이블에 대응하는 CRUD 및 조회 함수만 담당하며, 소유자 조건(`WHERE user_id = $1`)을 기본으로 포함한다.
 - `services/`는 여러 `repositories`를 조합해 트랜잭션이 필요한 로직(예: 카테고리 삭제 시 할일 이관 BR-5)을 `pg.Pool.connect()`로 얻은 클라이언트에서 `BEGIN`/`COMMIT`/`ROLLBACK`으로 감싸 처리한다.
