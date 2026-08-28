@@ -116,7 +116,7 @@ export const ko = {
     en: 'English',
     ja: '日本語',
   },
-} as const;
+};
 
 export const en = {
   common: {
@@ -237,7 +237,7 @@ export const en = {
     en: 'English',
     ja: '日本語',
   },
-} as const satisfies typeof ko;
+} satisfies typeof ko;
 
 export const ja = {
   common: {
@@ -358,7 +358,7 @@ export const ja = {
     en: 'English',
     ja: '日本語',
   },
-} as const satisfies typeof ko;
+} satisfies typeof ko;
 
 export type Messages = typeof ko;
 export type Locale = 'ko' | 'en' | 'ja';
