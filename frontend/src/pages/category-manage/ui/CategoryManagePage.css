@@ -1,10 +1,24 @@
+.category-manage-page {
+  min-height: 100svh;
+  background: var(--color-primary);
+}
+
 .category-manage-page__content {
   max-width: 720px;
-  margin: 0 auto;
-  padding: 32px 24px;
+  margin: 32px auto;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.category-manage-page__content h1 {
+  margin: 8px 0 0;
+  font-size: 1.75rem;
+  font-weight: 800;
 }
 
 .category-manage-page__list {
