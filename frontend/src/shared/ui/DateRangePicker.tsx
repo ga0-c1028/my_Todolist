@@ -1,4 +1,5 @@
 import { useState, type JSX } from 'react';
+import { useLocale } from '../config';
 import './DateRangePicker.css';
 
 interface DateRange {
@@ -11,8 +12,6 @@ interface DateRangePickerProps {
   endDate: string | null;
   onChange: (range: DateRange) => void;
 }
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 function toDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -30,6 +29,8 @@ export function DateRangePicker({ startDate, endDate, onChange }: DateRangePicke
   const [viewMonth, setViewMonth] = useState<Date>(() =>
     startOfMonth(startDate ? new Date(startDate) : new Date()),
   );
+  const { t, messages } = useLocale();
+  const WEEKDAYS = messages.dateRangePicker.weekdays;
 
   const togglePopover = (): void => {
     setOpen((prev) => !prev);
@@ -74,23 +75,33 @@ export function DateRangePicker({ startDate, endDate, onChange }: DateRangePicke
     <div className="date-range-picker">
       <div className="date-range-picker__triggers">
         <button type="button" className="date-range-picker__trigger" onClick={togglePopover}>
-          시작일자 {startDate ?? '선택해주세요'} 📅
+          {t('dateRangePicker.startDate')} {startDate ?? t('dateRangePicker.placeholder')} 📅
         </button>
         <button type="button" className="date-range-picker__trigger" onClick={togglePopover}>
-          종료일자 {endDate ?? '선택해주세요'} 📅
+          {t('dateRangePicker.endDate')} {endDate ?? t('dateRangePicker.placeholder')} 📅
         </button>
       </div>
 
       {open ? (
         <div className="date-range-picker__popover">
           <div className="date-range-picker__header">
-            <button type="button" className="date-range-picker__nav" onClick={goPrevMonth} aria-label="이전 달">
+            <button
+              type="button"
+              className="date-range-picker__nav"
+              onClick={goPrevMonth}
+              aria-label={t('dateRangePicker.prevMonth')}
+            >
               ‹
             </button>
             <span className="date-range-picker__month-title">
-              {year}년 {month + 1}월
+              {t('dateRangePicker.monthTitle', { year, month: month + 1 })}
             </span>
-            <button type="button" className="date-range-picker__nav" onClick={goNextMonth} aria-label="다음 달">
+            <button
+              type="button"
+              className="date-range-picker__nav"
+              onClick={goNextMonth}
+              aria-label={t('dateRangePicker.nextMonth')}
+            >
               ›
             </button>
           </div>

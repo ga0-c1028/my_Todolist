@@ -1,5 +1,6 @@
 import type { JSX, MouseEvent } from 'react';
 import { Button } from './Button';
+import { useLocale } from '../config';
 import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
@@ -16,11 +17,13 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = '확인',
-  cancelLabel = '취소',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps): JSX.Element | null {
+  const { t } = useLocale();
+
   if (!open) {
     return null;
   }
@@ -44,10 +47,10 @@ export function ConfirmDialog({
         {description ? <p className="confirm-dialog-description">{description}</p> : null}
         <div className="confirm-dialog-actions">
           <Button type="button" variant="secondary" onClick={onCancel}>
-            {cancelLabel}
+            {cancelLabel ?? t('common.cancel')}
           </Button>
           <Button type="button" variant="primary" onClick={onConfirm}>
-            {confirmLabel}
+            {confirmLabel ?? t('common.confirm')}
           </Button>
         </div>
       </div>

@@ -9,9 +9,22 @@
   --color-danger: #e5484d;
   --color-info: #2e6ade;
   --color-muted: #6b6558;
+  /* 흰 글자와 함께 쓰이는 고정 진한 배경(버튼, 활성 필터 등). 다크모드에서도 반전하지 않음 */
+  --color-solid: #111111;
 
   color-scheme: light;
   font-family: 'Pretendard', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root[data-theme='dark'] {
+  --color-ink: #f5f1e8;
+  --color-surface: #1c1b18;
+  --color-border: #f5f1e8;
+  --color-muted: #a39c8c;
+  --color-danger: #ff6b6e;
+  --color-info: #6c9bff;
+
+  color-scheme: dark;
 }
 
 * {

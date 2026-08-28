@@ -2,6 +2,7 @@ import { useState, type FormEvent, type JSX } from 'react';
 import { Button, ErrorMessage } from '../../../shared/ui';
 import { isValidName, isValidPassword } from '../../../shared/lib/validators';
 import type { User, UpdateUserRequest } from '../../../entities/user';
+import { useLocale } from '../../../shared/config';
 import './ProfileForm.css';
 
 interface ProfileFormProps {
@@ -17,21 +18,22 @@ export function ProfileForm({ user, onSubmit, isSubmitting, serverError, isSucce
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const { t } = useLocale();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!isValidName(name)) {
-      setValidationError('이름은 1자 이상 30자 이하로 입력해주세요.');
+      setValidationError(t('profile.errorInvalidName'));
       return;
     }
     if (password !== '') {
       if (!isValidPassword(password)) {
-        setValidationError('비밀번호는 영문·숫자를 포함해 8자 이상이어야 합니다.');
+        setValidationError(t('profile.errorInvalidPassword'));
         return;
       }
       if (password !== passwordConfirm) {
-        setValidationError('새 비밀번호가 일치하지 않습니다.');
+        setValidationError(t('profile.errorPasswordMismatch'));
         return;
       }
     }
@@ -45,11 +47,11 @@ export function ProfileForm({ user, onSubmit, isSubmitting, serverError, isSucce
   return (
     <form className="profile-form" onSubmit={handleSubmit} noValidate>
       <div className="profile-form__field">
-        <label htmlFor="profile-email">이메일</label>
+        <label htmlFor="profile-email">{t('profile.emailLabel')}</label>
         <input id="profile-email" type="email" value={user.email} readOnly disabled />
       </div>
       <div className="profile-form__field">
-        <label htmlFor="profile-name">이름</label>
+        <label htmlFor="profile-name">{t('profile.nameLabel')}</label>
         <input
           id="profile-name"
           type="text"
@@ -58,7 +60,7 @@ export function ProfileForm({ user, onSubmit, isSubmitting, serverError, isSucce
         />
       </div>
       <div className="profile-form__field">
-        <label htmlFor="profile-password">새 비밀번호 (영문·숫자 포함 8자 이상, 변경 시에만 입력)</label>
+        <label htmlFor="profile-password">{t('profile.passwordLabel')}</label>
         <input
           id="profile-password"
           type="password"
@@ -67,7 +69,7 @@ export function ProfileForm({ user, onSubmit, isSubmitting, serverError, isSucce
         />
       </div>
       <div className="profile-form__field">
-        <label htmlFor="profile-password-confirm">새 비밀번호 확인</label>
+        <label htmlFor="profile-password-confirm">{t('profile.passwordConfirmLabel')}</label>
         <input
           id="profile-password-confirm"
           type="password"
@@ -76,9 +78,9 @@ export function ProfileForm({ user, onSubmit, isSubmitting, serverError, isSucce
         />
       </div>
       <ErrorMessage message={serverError ?? validationError} />
-      {isSuccess ? <p className="profile-form__success">회원 정보가 수정되었습니다.</p> : null}
+      {isSuccess ? <p className="profile-form__success">{t('profile.successMessage')}</p> : null}
       <Button type="submit" disabled={isSubmitting}>
-        저장
+        {t('profile.submit')}
       </Button>
     </form>
   );

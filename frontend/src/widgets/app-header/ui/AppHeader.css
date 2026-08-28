@@ -41,6 +41,35 @@
   position: relative;
 }
 
+.app-header__locale-select {
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.app-header__theme-toggle {
+  background: none;
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-header__mobile-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .app-header__user-button {
   background: none;
   border: none;
@@ -79,6 +108,7 @@
 
 .app-header__dropdown-item:hover {
   background: var(--color-primary);
+  color: #111111;
 }
 
 .app-header__mobile {

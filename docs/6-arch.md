@@ -6,6 +6,7 @@
 |---|---|---|---|
 | 1.0 | 2026-08-26 | gayoung.rho | 기술 아키텍처 다이어그램 최초 작성 |
 | 1.1 | 2026-08-27 | gayoung.rho | 실제 프론트엔드 구현(FE-12)과의 정합성을 맞추기 위해 React Router/인증 가드(`RequireAuth`) 흐름 반영 |
+| 1.2 | 2026-08-28 | gayoung.rho | 라이트/다크 모드, 다국어 기능 추가에 따라 §1에 테마/언어 상태 관리 방식(Context + localStorage, 별도 API 없음) 반영 |
 
 ## 0. 개요 및 목적
 
@@ -33,7 +34,7 @@ flowchart LR
     DB -->|"조회 결과(row)"| API
 ```
 
-- 프론트엔드 상태: 서버 데이터는 TanStack Query, 클라이언트 전용 상태(로그인 정보, 필터값)는 Zustand가 관리한다.
+- 프론트엔드 상태: 서버 데이터는 TanStack Query, 클라이언트 전용 상태(로그인 정보, 필터값)는 Zustand가 관리한다. 테마(라이트/다크, FR-15)와 언어(ko/en/ja, FR-16)는 서버와 무관한 순수 클라이언트 설정이므로 별도 API 없이 React Context(`shared/config/theme`, `shared/config/i18n`)와 `localStorage`만으로 관리한다.
 - 프론트엔드 라우팅: React Router(`createBrowserRouter`)가 화면 전환을 담당하며, 인증이 필요한 라우트는 `RequireAuth` 가드를 거친다. 미인증 상태로 보호된 라우트에 접근하면 로그인 화면으로 리다이렉트하고(BR-1), 로그인 성공 시 원래 요청했던 경로로 되돌아간다.
 - 백엔드는 단일 프로세스의 Express 서버 하나로 구성하며, `pg.Pool`로 커넥션을 풀링해 DB에 접근한다.
 

@@ -2,20 +2,22 @@ import { useState, type JSX } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../../entities/user';
 import { useLogout } from '../../../features/auth-logout';
-import { getEnv } from '../../../shared/config';
+import { getEnv, useLocale, useTheme, SUPPORTED_LOCALES, type Locale } from '../../../shared/config';
 import './AppHeader.css';
-
-const NAV_ITEMS = [
-  { label: '할일 목록', to: '/todos' },
-  { label: '카테고리 관리', to: '/categories' },
-  { label: '회원 정보', to: '/profile' },
-];
 
 export function AppHeader(): JSX.Element {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userName = useAuthStore((state) => state.user)?.name ?? '';
   const logout = useLogout();
+  const { locale, setLocale, messages, t } = useLocale();
+  const { theme, toggleTheme } = useTheme();
+
+  const NAV_ITEMS = [
+    { label: t('header.navTodos'), to: '/todos' },
+    { label: t('header.navCategories'), to: '/categories' },
+    { label: t('header.navProfile'), to: '/profile' },
+  ];
 
   const handleLogout = () => {
     if (getEnv().isDev) console.log('[app-header] 로그아웃 클릭');
@@ -41,6 +43,26 @@ export function AppHeader(): JSX.Element {
             </NavLink>
           ))}
         </nav>
+        <select
+          className="app-header__locale-select"
+          aria-label="language"
+          value={locale}
+          onChange={(event) => setLocale(event.target.value as Locale)}
+        >
+          {SUPPORTED_LOCALES.map((code) => (
+            <option key={code} value={code}>
+              {messages.locale[code]}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="app-header__theme-toggle"
+          aria-label={theme === 'light' ? t('theme.toDark') : t('theme.toLight')}
+          onClick={toggleTheme}
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
         <div className="app-header__user">
           <button
             type="button"
@@ -56,14 +78,14 @@ export function AppHeader(): JSX.Element {
                 className="app-header__dropdown-item"
                 onClick={() => setUserMenuOpen(false)}
               >
-                회원 정보 수정
+                {t('header.editProfile')}
               </Link>
               <button
                 type="button"
                 className="app-header__dropdown-item"
                 onClick={handleLogout}
               >
-                로그아웃
+                {t('header.logout')}
               </button>
             </div>
           )}
@@ -74,7 +96,7 @@ export function AppHeader(): JSX.Element {
         <button
           type="button"
           className="app-header__hamburger"
-          aria-label="메뉴 열기"
+          aria-label={t('header.menuOpen')}
           onClick={() => setMobileMenuOpen((open) => !open)}
         >
           ≡
@@ -97,6 +119,28 @@ export function AppHeader(): JSX.Element {
               {item.label}
             </Link>
           ))}
+          <div className="app-header__mobile-item app-header__mobile-controls">
+            <select
+              className="app-header__locale-select"
+              aria-label="language"
+              value={locale}
+              onChange={(event) => setLocale(event.target.value as Locale)}
+            >
+              {SUPPORTED_LOCALES.map((code) => (
+                <option key={code} value={code}>
+                  {messages.locale[code]}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="app-header__theme-toggle"
+              aria-label={theme === 'light' ? t('theme.toDark') : t('theme.toLight')}
+              onClick={toggleTheme}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+          </div>
           <button
             type="button"
             className="app-header__mobile-item"
@@ -105,7 +149,7 @@ export function AppHeader(): JSX.Element {
               handleLogout();
             }}
           >
-            로그아웃
+            {t('header.logout')}
           </button>
         </div>
       )}

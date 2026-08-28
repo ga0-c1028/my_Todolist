@@ -2,6 +2,7 @@ import type { JSX } from 'react';
 import { Button } from '../../../shared/ui/Button';
 import type { Todo } from '../model/types';
 import { TodoStatusBadge } from './TodoStatusBadge';
+import { useLocale } from '../../../shared/config';
 import './TodoListItem.css';
 
 interface TodoListItemProps {
@@ -22,6 +23,7 @@ export function TodoListItem({
   const titleClassName = todo.isCompleted
     ? 'todo-list-item__title todo-list-item__title--completed'
     : 'todo-list-item__title';
+  const { t } = useLocale();
 
   return (
     <div className="todo-list-item">
@@ -43,10 +45,10 @@ export function TodoListItem({
       </div>
       <div className="todo-list-item__actions">
         <Button variant="secondary" onClick={() => onEdit?.(todo)}>
-          수정
+          {t('common.edit')}
         </Button>
         <Button variant="secondary" onClick={() => onDelete?.(todo)}>
-          삭제
+          {t('common.delete')}
         </Button>
       </div>
     </div>

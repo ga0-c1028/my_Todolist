@@ -4,6 +4,7 @@ import { TodoForm, useCreateTodo, type TodoFormValues } from '../../../features/
 import { useUpdateTodo } from '../../../features/todo-edit';
 import { useTodosQuery } from '../../../entities/todo';
 import { getEnv } from '../../../shared/config/env';
+import { useLocale } from '../../../shared/config';
 import './TodoFormPage.css';
 
 export function TodoFormPage() {
@@ -15,6 +16,7 @@ export function TodoFormPage() {
   const createMutation = useCreateTodo();
   const updateMutation = useUpdateTodo();
   const mutation = isEdit ? updateMutation : createMutation;
+  const { t } = useLocale();
 
   function handleSubmit(values: TodoFormValues) {
     const payload = {
@@ -50,8 +52,8 @@ export function TodoFormPage() {
       <div className="todo-form-page">
         <AppHeader />
         <div className="todo-form-page__content">
-          <p>해당 할일을 찾을 수 없습니다.</p>
-          <Link to="/todos">← 목록으로</Link>
+          <p>{t('todoForm.notFound')}</p>
+          <Link to="/todos">{t('todoForm.backToList')}</Link>
         </div>
       </div>
     );
@@ -62,9 +64,9 @@ export function TodoFormPage() {
       <AppHeader />
       <div className="todo-form-page__content">
         <Link to="/todos" className="todo-form-page__back">
-          ← 목록으로
+          {t('todoForm.backToList')}
         </Link>
-        <h1>{isEdit ? '할일 수정' : '할일 등록'}</h1>
+        <h1>{isEdit ? t('todoForm.titleEdit') : t('todoForm.titleCreate')}</h1>
         <TodoForm
           mode={isEdit ? 'edit' : 'create'}
           initialValues={
@@ -82,7 +84,7 @@ export function TodoFormPage() {
           onSubmit={handleSubmit}
           isSubmitting={mutation.isPending}
           serverError={mutation.error?.message}
-          submitLabel={isEdit ? '저장' : '등록'}
+          submitLabel={isEdit ? t('todoForm.submitEdit') : t('todoForm.submitCreate')}
         />
       </div>
     </div>

@@ -9,6 +9,7 @@
 | 1.2 | 2026-08-27 | gayoung.rho | 실제 백엔드 구현과의 정합성을 맞추기 위해 갱신: 헬스 라우트 파일명(`health.js`), `schemas/` 실제 파일명(복수형 4개), `db/` 하위 마이그레이션·시드 스크립트 미작성 사실 반영, BR-2 소유권 검증을 서비스 계층 단일 검증으로 명확화, Swagger UI(`/api-docs`, 비운영 환경 한정) 절 추가 |
 | 1.3 | 2026-08-27 | gayoung.rho | 실제 프론트엔드 구현(FE-01~FE-15)과의 정합성을 맞추기 위해 갱신: §6 트리에 `app/routes/RequireAuth.tsx`·`app/test-setup.ts`·`shared/*/index.ts`·`useDeleteAccount.ts` 반영, §4 프론트엔드 테스트 도구를 "권장"에서 Vitest+Testing Library "채택"으로 확정, §5에 5.7 날짜/타임존 처리 원칙 신설(이후 절 번호 한 칸씩 밀림: 헬스체크 5.8, Swagger UI 5.9) |
 | 1.4 | 2026-08-27 | gayoung.rho | DB-03에서 `db/seed.js`를 실제로 작성함에 따라 §7 `db/` 트리 및 관련 설명 갱신 |
+| 1.5 | 2026-08-28 | gayoung.rho | 다크모드/다국어(FE-16, FE-17) 추가에 따라 §6 트리에 `shared/config/i18n/`, `shared/config/theme/` 반영 |
 
 ## 0. 개요 및 목적
 
@@ -260,6 +261,13 @@ frontend/
         │   └── index.ts
         ├── config/
         │   ├── env.ts                      # import.meta.env 파싱
+        │   ├── i18n/
+        │   │   ├── dictionaries.ts           # ko/en/ja 번역 딕셔너리(FE-17)
+        │   │   ├── LocaleContext.tsx         # useLocale 훅(locale, setLocale, messages, t)
+        │   │   └── index.ts
+        │   ├── theme/
+        │   │   ├── ThemeContext.tsx          # useTheme 훅(라이트/다크 전환, localStorage 저장, FE-16)
+        │   │   └── index.ts
         │   └── index.ts
         ├── lib/
         │   ├── validators.ts                # 이메일 형식, 비밀번호 규칙 등 순수 검증 함수

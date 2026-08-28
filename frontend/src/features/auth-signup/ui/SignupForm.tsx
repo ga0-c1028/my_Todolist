@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type JSX } from 'react';
 import { Button, ErrorMessage } from '../../../shared/ui';
 import { isValidEmail, isValidPassword, isValidName } from '../../../shared/lib/validators';
 import { useSignup } from '../model/useSignup';
+import { useLocale } from '../../../shared/config';
 import './SignupForm.css';
 
 interface SignupFormProps {
@@ -14,20 +15,21 @@ export function SignupForm({ onSuccess }: SignupFormProps): JSX.Element {
   const [name, setName] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const mutation = useSignup();
+  const { t } = useLocale();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!isValidEmail(email)) {
-      setValidationError('올바른 이메일 형식이 아닙니다.');
+      setValidationError(t('signup.errorInvalidEmail'));
       return;
     }
     if (!isValidPassword(password)) {
-      setValidationError('비밀번호는 영문·숫자를 포함해 8자 이상이어야 합니다.');
+      setValidationError(t('signup.errorInvalidPassword'));
       return;
     }
     if (!isValidName(name)) {
-      setValidationError('이름은 1자 이상 30자 이하로 입력해주세요.');
+      setValidationError(t('signup.errorInvalidName'));
       return;
     }
 
@@ -43,13 +45,13 @@ export function SignupForm({ onSuccess }: SignupFormProps): JSX.Element {
   }, [mutation.isSuccess]);
 
   if (mutation.isSuccess) {
-    return <p role="status">가입이 완료되었습니다. 로그인해주세요.</p>;
+    return <p role="status">{t('signup.successMessage')}</p>;
   }
 
   return (
     <form className="signup-form" onSubmit={handleSubmit} noValidate>
       <div className="signup-form__field">
-        <label htmlFor="signup-email">이메일</label>
+        <label htmlFor="signup-email">{t('signup.emailLabel')}</label>
         <input
           id="signup-email"
           type="email"
@@ -59,7 +61,7 @@ export function SignupForm({ onSuccess }: SignupFormProps): JSX.Element {
         />
       </div>
       <div className="signup-form__field">
-        <label htmlFor="signup-password">비밀번호 (영문·숫자 포함 8자 이상)</label>
+        <label htmlFor="signup-password">{t('signup.passwordLabel')}</label>
         <input
           id="signup-password"
           type="password"
@@ -69,7 +71,7 @@ export function SignupForm({ onSuccess }: SignupFormProps): JSX.Element {
         />
       </div>
       <div className="signup-form__field">
-        <label htmlFor="signup-name">이름</label>
+        <label htmlFor="signup-name">{t('signup.nameLabel')}</label>
         <input
           id="signup-name"
           type="text"
@@ -80,7 +82,7 @@ export function SignupForm({ onSuccess }: SignupFormProps): JSX.Element {
       </div>
       <ErrorMessage message={mutation.isError ? mutation.error.message : validationError} />
       <Button type="submit" disabled={mutation.isPending}>
-        가입하기
+        {t('signup.submit')}
       </Button>
     </form>
   );

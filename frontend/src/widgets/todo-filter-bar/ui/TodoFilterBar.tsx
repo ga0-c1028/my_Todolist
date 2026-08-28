@@ -2,15 +2,8 @@ import type { JSX } from 'react';
 import { useCategoriesQuery } from '../../../entities/category';
 import type { TodoStatus } from '../../../entities/todo';
 import { useTodoFilterStore } from '../../../features/todo-filter';
+import { useLocale } from '../../../shared/config';
 import './TodoFilterBar.css';
-
-const STATUS_OPTIONS: Array<{ label: string; value: TodoStatus | undefined }> = [
-  { label: '전체', value: undefined },
-  { label: '시작 전', value: 'notStarted' },
-  { label: '진행중', value: 'inProgress' },
-  { label: '완료', value: 'completed' },
-  { label: '기한초과', value: 'overdue' },
-];
 
 export function TodoFilterBar(): JSX.Element {
   const { data: categories } = useCategoriesQuery();
@@ -18,12 +11,21 @@ export function TodoFilterBar(): JSX.Element {
   const status = useTodoFilterStore((state) => state.status);
   const setCategoryId = useTodoFilterStore((state) => state.setCategoryId);
   const setStatus = useTodoFilterStore((state) => state.setStatus);
+  const { t, messages } = useLocale();
+
+  const STATUS_OPTIONS: Array<{ label: string; value: TodoStatus | undefined }> = [
+    { label: messages.todoFilter.all, value: undefined },
+    { label: messages.todoStatus.notStarted, value: 'notStarted' },
+    { label: messages.todoStatus.inProgress, value: 'inProgress' },
+    { label: messages.todoStatus.completed, value: 'completed' },
+    { label: messages.todoStatus.overdue, value: 'overdue' },
+  ];
 
   return (
     <div className="todo-filter-bar">
       <div className="todo-filter-bar__group">
         <label className="todo-filter-bar__label" htmlFor="todo-filter-category">
-          카테고리:
+          {t('todoFilter.categoryLabel')}
         </label>
         <select
           id="todo-filter-category"
@@ -31,7 +33,7 @@ export function TodoFilterBar(): JSX.Element {
           value={categoryId ?? ''}
           onChange={(event) => setCategoryId(event.target.value || undefined)}
         >
-          <option value="">전체</option>
+          <option value="">{t('todoFilter.all')}</option>
           {(categories ?? []).map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -41,8 +43,8 @@ export function TodoFilterBar(): JSX.Element {
       </div>
 
       <div className="todo-filter-bar__group">
-        <span className="todo-filter-bar__label">상태:</span>
-        <div className="todo-filter-bar__status-buttons" role="group" aria-label="상태 필터">
+        <span className="todo-filter-bar__label">{t('todoFilter.statusLabel')}</span>
+        <div className="todo-filter-bar__status-buttons" role="group" aria-label={t('todoFilter.statusFilterAriaLabel')}>
           {STATUS_OPTIONS.map((option) => (
             <button
               key={option.label}
@@ -60,7 +62,7 @@ export function TodoFilterBar(): JSX.Element {
         </div>
         <select
           className="todo-filter-bar__status-select"
-          aria-label="상태 필터"
+          aria-label={t('todoFilter.statusFilterAriaLabel')}
           value={status ?? ''}
           onChange={(event) =>
             setStatus((event.target.value || undefined) as TodoStatus | undefined)

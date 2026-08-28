@@ -55,7 +55,7 @@
 }
 
 .todo-filter-bar__status-button--active {
-  background: var(--color-ink);
+  background: var(--color-solid);
   color: #ffffff;
 }
 

@@ -2,6 +2,7 @@ import { useState, type FormEvent, type JSX } from 'react';
 import { Button, ErrorMessage, DateRangePicker } from '../../../shared/ui';
 import { isValidTodoTitle } from '../../../shared/lib/validators';
 import { useCategoriesQuery } from '../../../entities/category';
+import { useLocale } from '../../../shared/config';
 import './TodoForm.css';
 
 export interface TodoFormValues {
@@ -38,20 +39,21 @@ export function TodoForm({
   const [isCompleted, setIsCompleted] = useState(initialValues?.isCompleted ?? false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const { data: categories } = useCategoriesQuery();
+  const { t } = useLocale();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!isValidTodoTitle(title)) {
-      setValidationError('제목은 1자 이상 100자 이하로 입력해주세요.');
+      setValidationError(t('todoForm.errorInvalidTitle'));
       return;
     }
     if (!startDate || !endDate) {
-      setValidationError('시작일자와 종료일자를 모두 선택해주세요.');
+      setValidationError(t('todoForm.errorDatesRequired'));
       return;
     }
     if (endDate < startDate) {
-      setValidationError('종료일자는 시작일자보다 빠를 수 없습니다.');
+      setValidationError(t('todoForm.errorDateOrder'));
       return;
     }
 
@@ -62,7 +64,7 @@ export function TodoForm({
   return (
     <form className="todo-form" onSubmit={handleSubmit} noValidate>
       <div className="todo-form__field">
-        <label htmlFor="todo-title">제목</label>
+        <label htmlFor="todo-title">{t('todoForm.titleLabel')}</label>
         <input
           id="todo-title"
           type="text"
@@ -71,7 +73,7 @@ export function TodoForm({
         />
       </div>
       <div className="todo-form__field">
-        <label htmlFor="todo-description">설명 (선택)</label>
+        <label htmlFor="todo-description">{t('todoForm.descriptionLabel')}</label>
         <textarea
           id="todo-description"
           value={description}
@@ -80,13 +82,13 @@ export function TodoForm({
         />
       </div>
       <div className="todo-form__field">
-        <label htmlFor="todo-category">카테고리</label>
+        <label htmlFor="todo-category">{t('todoForm.categoryLabel')}</label>
         <select
           id="todo-category"
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}
         >
-          <option value="">기본 카테고리 사용</option>
+          <option value="">{t('todoForm.defaultCategoryOption')}</option>
           {(categories ?? []).map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -112,7 +114,7 @@ export function TodoForm({
             checked={isCompleted}
             onChange={(event) => setIsCompleted(event.target.checked)}
           />
-          <label htmlFor="todo-is-completed">완료</label>
+          <label htmlFor="todo-is-completed">{t('todoForm.completedLabel')}</label>
         </div>
       ) : null}
       <ErrorMessage message={serverError ?? validationError} />

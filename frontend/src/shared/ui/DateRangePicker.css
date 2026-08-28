@@ -96,7 +96,7 @@
 }
 
 .date-range-picker__weekday--weekday {
-  background: var(--color-ink);
+  background: var(--color-solid);
 }
 
 .date-range-picker__grid {

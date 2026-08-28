@@ -8,7 +8,7 @@ import { useCategoriesQuery } from '../../../entities/category';
 import { useToggleComplete } from '../../../features/todo-toggle-complete';
 import { useDeleteTodo } from '../../../features/todo-delete';
 import { Button, ConfirmDialog } from '../../../shared/ui';
-import { getEnv } from '../../../shared/config';
+import { getEnv, useLocale } from '../../../shared/config';
 import './TodoListPage.css';
 
 export function TodoListPage() {
@@ -19,6 +19,7 @@ export function TodoListPage() {
   const toggleComplete = useToggleComplete();
   const deleteTodo = useDeleteTodo();
   const [pendingDelete, setPendingDelete] = useState<Todo | null>(null);
+  const { t } = useLocale();
 
   const categoryNameById = new Map((categories ?? []).map((c) => [c.id, c.name]));
 
@@ -35,11 +36,11 @@ export function TodoListPage() {
       <div className="todo-list-page__content">
         <div className="todo-list-page__toolbar">
           <TodoFilterBar />
-          <Button onClick={() => navigate('/todos/new')}>+ 할일 등록</Button>
+          <Button onClick={() => navigate('/todos/new')}>{t('todoList.addButton')}</Button>
         </div>
 
         {(todos ?? []).length === 0 ? (
-          <p className="todo-list-page__empty">등록된 할일이 없습니다. 새 할일을 등록해보세요.</p>
+          <p className="todo-list-page__empty">{t('todoList.empty')}</p>
         ) : (
           <div className="todo-list-page__items">
             {(todos ?? []).map((todo) => (
@@ -58,10 +59,10 @@ export function TodoListPage() {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="할일을 삭제하시겠어요?"
-        description="삭제된 할일은 복구할 수 없습니다."
-        confirmLabel="삭제"
-        cancelLabel="취소"
+        title={t('todoList.deleteConfirmTitle')}
+        description={t('todoList.deleteConfirmDescription')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDelete(null)}
       />

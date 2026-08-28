@@ -3,6 +3,7 @@ import { AppHeader } from '../../../widgets/app-header';
 import { useCategoriesQuery, type Category } from '../../../entities/category';
 import { CategoryForm, useCreateCategory, useUpdateCategory, useDeleteCategory } from '../../../features/category-manage';
 import { Button, ConfirmDialog } from '../../../shared/ui';
+import { useLocale } from '../../../shared/config';
 import './CategoryManagePage.css';
 
 export function CategoryManagePage(): JSX.Element {
@@ -12,6 +13,7 @@ export function CategoryManagePage(): JSX.Element {
   const deleteMutation = useDeleteCategory();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Category | null>(null);
+  const { t } = useLocale();
 
   function handleCreate(name: string): void {
     createMutation.mutate({ name });
@@ -38,11 +40,11 @@ export function CategoryManagePage(): JSX.Element {
     <div className="category-manage-page">
       <AppHeader />
       <div className="category-manage-page__content">
-        <h1>카테고리 관리</h1>
+        <h1>{t('category.pageTitle')}</h1>
 
         <CategoryForm
           onSubmit={handleCreate}
-          submitLabel="추가"
+          submitLabel={t('category.addSubmitLabel')}
           isSubmitting={createMutation.isPending}
           serverError={createMutation.error?.message}
         />
@@ -52,8 +54,8 @@ export function CategoryManagePage(): JSX.Element {
             category.isDefault ? (
               <div key={category.id} className="category-manage-page__row">
                 <span className="category-manage-page__name">{category.name}</span>
-                <span className="category-manage-page__badge">(수정 불가)</span>
-                <span className="category-manage-page__badge">(삭제 불가)</span>
+                <span className="category-manage-page__badge">{t('category.notEditable')}</span>
+                <span className="category-manage-page__badge">{t('category.notDeletable')}</span>
               </div>
             ) : editingId === category.id ? (
               <div key={category.id} className="category-manage-page__row">
@@ -61,7 +63,7 @@ export function CategoryManagePage(): JSX.Element {
                   initialName={category.name}
                   onSubmit={(name) => handleUpdate(category, name)}
                   onCancel={() => setEditingId(null)}
-                  submitLabel="저장"
+                  submitLabel={t('category.saveSubmitLabel')}
                   isSubmitting={updateMutation.isPending}
                   serverError={updateMutation.error?.message}
                 />
@@ -71,10 +73,10 @@ export function CategoryManagePage(): JSX.Element {
                 <span className="category-manage-page__name">{category.name}</span>
                 <div className="category-manage-page__actions">
                   <Button type="button" variant="secondary" onClick={() => setEditingId(category.id)}>
-                    수정
+                    {t('common.edit')}
                   </Button>
                   <Button type="button" variant="secondary" onClick={() => setPendingDelete(category)}>
-                    삭제
+                    {t('common.delete')}
                   </Button>
                 </div>
               </div>
@@ -85,10 +87,10 @@ export function CategoryManagePage(): JSX.Element {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="카테고리를 삭제하시겠어요?"
-        description="삭제 시 소속 할일은 '기본' 카테고리로 이동합니다."
-        confirmLabel="삭제"
-        cancelLabel="취소"
+        title={t('category.deleteConfirmTitle')}
+        description={t('category.deleteConfirmDescription')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDelete(null)}
       />
